@@ -1,75 +1,49 @@
 import { useState } from 'react'
-import { CardList } from "@/containers"
-import { ComparisonBanner } from "@/components/ui"
-import type { CardData } from "@/containers"
+import { KubeClusterList } from "@/containers"
+import { ComparisonBanner, ViewToggle } from "@/components/ui"
+import { sampleClusters } from "@/data/sampleClusters"
 import { DefaultLayout } from "@/components/layout"
-
-const sampleItems: CardData[] = [
-  {
-    id: '1',
-    title: 'React Framework',
-    description: 'A JavaScript library for building user interfaces with component-based architecture.',
-  },
-  {
-    id: '2',
-    title: 'Vue.js Framework',
-    description: 'The progressive JavaScript framework for building modern web applications.',
-  },
-  {
-    id: '3',
-    title: 'Angular Framework',
-    description: 'A platform for building mobile and desktop web applications using TypeScript.',
-  },
-  {
-    id: '4',
-    title: 'Svelte Framework',
-    description: 'A radical new approach to building user interfaces with compile-time optimizations.',
-  },
-  {
-    id: '5',
-    title: 'Next.js Framework',
-    description: 'The React framework for production with hybrid static & server rendering.',
-  },
-  {
-    id: '6',
-    title: 'Nuxt.js Framework',
-    description: 'The intuitive Vue framework for building universal applications.',
-  }
-]
+import { useKeydownShortcut } from '@/hooks/useKeydownShortcut'
 
 export default function HomePage() {
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [selectedClusters, setSelectedClusters] = useState<string[]>([])
+  const [view, setView] = useState<'card' | 'list'>('card')
 
   const handleSelectionChange = (selectedIds: string[]) => {
-    setSelectedItems(selectedIds)
+    setSelectedClusters(selectedIds)
   }
+
+  // Add view toggle keybind
+  useKeydownShortcut(
+    { key: 'v', ctrl: false, alt: false, shift: false, meta: false },
+    () => setView(prev => prev === 'card' ? 'list' : 'card'),
+    'Toggle View',
+    'Switch between card and list view'
+  )
 
   return (
     <DefaultLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Compare Frameworks
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Select items to compare their features and capabilities.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Kubernetes Clusters
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Monitor and manage your Kubernetes infrastructure across environments.
+            </p>
+          </div>
+          <ViewToggle view={view} onViewChange={setView} />
         </div>
 
-        <ComparisonBanner selectedItems={selectedItems} />
+        <ComparisonBanner selectedItems={selectedClusters} />
 
-        <CardList
-          items={sampleItems}
-          selectedItems={selectedItems}
+        <KubeClusterList
+          clusters={sampleClusters}
+          selectedClusters={selectedClusters}
           onSelectionChange={handleSelectionChange}
-          showSelectionCount={true}
-          emptyMessage="No frameworks available"
-          gridCols={{
-            default: 1,
-            sm: 2,
-            lg: 3,
-            xl: 4
-          }}
+          view={view}
+          emptyMessage="No clusters available"
         />
       </div>
     </DefaultLayout>
