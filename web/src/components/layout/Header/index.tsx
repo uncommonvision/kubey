@@ -11,7 +11,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-2 sm:px-4">
         {/* Left side: Logo and Title */}
         <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
@@ -21,7 +21,7 @@ export default function Header() {
         </div>
 
         {/* Right side: Search Bar, Theme Toggle and User Menu */}
-        <div className="flex items-center space-x-2 flex-1 justify-end ml-48">
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-1 justify-end ml-2 sm:ml-4 md:ml-8 lg:ml-16">
           <SearchBar 
             placeholder="Type / to search" 
             onSearch={handleSearch}
