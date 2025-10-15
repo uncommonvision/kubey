@@ -78,7 +78,7 @@ export default function KeyboardShortcutsOverlay() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
         ref={overlayRef}
-        className="w-full max-w-[650px] max-h-[350px] bg-popover border border-border rounded-lg shadow-lg overflow-hidden flex flex-col"
+        className="w-[66.67vw] max-h-[66.67vh] bg-popover border border-border rounded-lg shadow-lg overflow-hidden flex flex-col"
       >
         <div className="px-6 py-4 border-b border-border flex items-center gap-2">
           <Keyboard className="h-5 w-5 text-muted-foreground" />
