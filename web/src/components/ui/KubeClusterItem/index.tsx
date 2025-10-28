@@ -8,19 +8,20 @@ interface KubeClusterItemProps {
   onSelect?: (id: string, selected: boolean) => void
 }
 
-export default function KubeClusterItem({ 
-  cluster, 
-  isSelected = false, 
-  onSelect 
+export default function KubeClusterItem({
+  cluster,
+  isSelected = false,
+  onSelect
 }: KubeClusterItemProps) {
-  const totalPods = cluster.nodes.flatMap(n => n.pods).length
-  const totalNodes = cluster.nodes.length
-  const totalNamespaces = cluster.namespaces.length
-  const totalDeployments = cluster.namespaces.flatMap(ns => ns.deployments).length
-  const healthyDeployments = cluster.namespaces
-    .flatMap(ns => ns.deployments)
-    .filter(d => d.replicas > 0)
-    .length
+  // Use summary data if available, otherwise calculate from nodes/namespaces
+  const totalPods = cluster.summary?.totalPods ?? cluster.nodes?.flatMap(n => n.pods || []).length ?? 0
+  const totalNodes = cluster.summary?.totalNodes ?? cluster.nodes?.length ?? 0
+  const totalNamespaces = cluster.summary?.totalNamespaces ?? cluster.namespaces?.length ?? 0
+  const totalDeployments = cluster.summary?.totalDeployments ?? cluster.namespaces?.flatMap(ns => ns.deployments || []).length ?? 0
+  const healthyDeployments = cluster.summary?.runningPods ?? cluster.namespaces
+    ?.flatMap(ns => ns.deployments || [])
+    .filter(d => d.replicas != null && d.replicas > 0)
+    .length ?? 0
 
   const title = (
     <div className="flex items-center gap-2">

@@ -12,14 +12,15 @@ export default function KubeClusterListItem({
   isSelected = false,
   onSelect
 }: KubeClusterListItemProps) {
-  const totalPods = cluster.nodes.flatMap(n => n.pods).length
-  const totalNodes = cluster.nodes.length
-  const totalNamespaces = cluster.namespaces.length
-  const totalDeployments = cluster.namespaces.flatMap(ns => ns.deployments).length
-  const healthyDeployments = cluster.namespaces
-    .flatMap(ns => ns.deployments)
-    .filter(d => d.replicas > 0)
-    .length
+  // Use summary data if available, otherwise calculate from nodes/namespaces
+  const totalPods = cluster.summary?.totalPods ?? cluster.nodes?.flatMap(n => n.pods || []).length ?? 0
+  const totalNodes = cluster.summary?.totalNodes ?? cluster.nodes?.length ?? 0
+  const totalNamespaces = cluster.summary?.totalNamespaces ?? cluster.namespaces?.length ?? 0
+  const totalDeployments = cluster.summary?.totalDeployments ?? cluster.namespaces?.flatMap(ns => ns.deployments || []).length ?? 0
+  const healthyDeployments = cluster.summary?.runningPods ?? cluster.namespaces
+    ?.flatMap(ns => ns.deployments || [])
+    .filter(d => d.replicas != null && d.replicas > 0)
+    .length ?? 0
 
   const handleSelect = () => {
     onSelect?.(cluster.id, !isSelected)
