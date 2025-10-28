@@ -1,17 +1,46 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { KubeClusterList } from "@/containers"
 import { ComparisonBanner, ViewToggle } from "@/components/ui"
-import { sampleClusters } from "@/data/sampleClusters"
 import { DefaultLayout } from "@/components/layout"
 import { useKeydownShortcut } from '@/hooks/useKeydownShortcut'
+import { api, ApiError } from '@/lib/api'
+import type { KubeCluster } from '@/types/kube'
 
 export default function HomePage() {
   const [selectedClusters, setSelectedClusters] = useState<string[]>([])
   const [view, setView] = useState<'card' | 'list'>('card')
+  const [clusters, setClusters] = useState<KubeCluster[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSelectionChange = (selectedIds: string[]) => {
     setSelectedClusters(selectedIds)
   }
+
+  // Fetch clusters from API
+  useEffect(() => {
+    const fetchClusters = async () => {
+      try {
+        console.log('Fetching clusters from API...')
+        setLoading(true)
+        setError(null)
+        const data = await api.getClusters()
+        console.log('Received clusters:', data)
+        setClusters(data)
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setError(err.message)
+        } else {
+          setError('Failed to fetch clusters')
+        }
+        console.error('Error fetching clusters:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchClusters()
+  }, [])
 
   // Add view toggle keybind
   useKeydownShortcut(
@@ -38,13 +67,35 @@ export default function HomePage() {
 
         <ComparisonBanner selectedItems={selectedClusters} />
 
-        <KubeClusterList
-          clusters={sampleClusters}
-          selectedClusters={selectedClusters}
-          onSelectionChange={handleSelectionChange}
-          view={view}
-          emptyMessage="No clusters available"
-        />
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-muted-foreground">Loading clusters...</div>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-1">
+                <h3 className="font-semibold text-destructive mb-1">Error loading clusters</h3>
+                <p className="text-sm text-destructive/80">{error}</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Make sure the backend server is running on http://localhost:8080
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <KubeClusterList
+            clusters={clusters}
+            selectedClusters={selectedClusters}
+            onSelectionChange={handleSelectionChange}
+            view={view}
+            emptyMessage="No clusters available"
+          />
+        )}
       </div>
     </DefaultLayout>
   )
