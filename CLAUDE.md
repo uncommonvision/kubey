@@ -30,8 +30,8 @@ Working directory: `C:\Users\Justi\Documents\kubey\web`
 
 Working directory: `C:\Users\Justi\Documents\kubey\server`
 
-- **Run server**: `go run main.go`
-- **Build**: `go build -o kubey-server.exe main.go`
+- **Run server**: `go run cmd/api/main.go`
+- **Build**: `go build -o kubey-server.exe ./cmd/api/main.go`
 - **Install dependencies**: `go mod download`
 - **Update dependencies**: `go get -u ./...`
 - **Tidy dependencies**: `go mod tidy`
@@ -64,23 +64,21 @@ KubeCluster (root)
 
 - **Framework**: Gin web framework
 - **Kubernetes Client**: k8s.io/client-go v0.34.1
-- **WebSocket Hub**: Custom implementation for real-time cluster updates
 - **Configuration**: Environment variables via godotenv (optional .env file)
 
 Backend structure:
 ```
 server/
-├── main.go                          # Entry point, server setup
+├── cmd/
+│   └── api/main.go                              # Entry point, server setup
 ├── internal/
-│   ├── config/config.go            # Environment configuration
-│   ├── routes/routes.go            # Route definitions + CORS
-│   ├── handlers/clusters.go        # HTTP handlers
-│   ├── services/kubernetes.go      # K8s client + data fetching
-│   ├── models/kubernetes.go        # Go struct definitions
-│   └── api/websocket/              # WebSocket implementation
-│       ├── hub.go                  # WebSocket hub (broadcast system)
-│       ├── client.go               # WebSocket client
-│       └── handlers.go             # WebSocket HTTP handlers
+│   ├── config/config.go                         # ApiConfig with HTTP timeouts
+│   ├── routes/routes.go                         # Route definitions + CORS
+│   ├── handlers/
+│   │   └── clusters/clusters.go                 # Cluster HTTP handlers
+│   ├── services/
+│   │   └── kubernetes/kubernetes.go             # K8s client + data fetching
+│   └── models/kubernetes.go                     # Go struct definitions
 ```
 
 ### API Endpoints
@@ -95,10 +93,6 @@ REST API (port 8080):
 - `GET /api/clusters/:id/namespaces` - Get namespaces with resources
 - `GET /health` - Health check
 
-WebSocket endpoints:
-- `GET /ws` - WebSocket connection for real-time updates
-- `GET /ws/status` - WebSocket hub status
-
 ### Kubernetes Client Initialization
 
 The backend initializes the Kubernetes client in this order:
@@ -106,15 +100,14 @@ The backend initializes the Kubernetes client in this order:
 2. Try in-cluster config (for running inside K8s)
 3. Fall back to default kubeconfig (~/.kube/config)
 
-The client is initialized once at startup in `main.go` via `services.InitKubernetesClient()`.
+The client is initialized once at startup in `cmd/api/main.go` via `kubernetes.InitClient()`.
 
 ### Data Flow
 
 1. Frontend makes HTTP requests to `/api/*` endpoints
-2. Backend handlers call `services/*` functions
+2. Backend handlers (in `handlers/clusters` package) call `kubernetes` service functions
 3. Services use `k8s.io/client-go` to query Kubernetes API
 4. Data is transformed to internal models and returned as JSON
-5. WebSocket hub broadcasts real-time updates when cluster state changes
 
 ## Environment Configuration
 
@@ -127,13 +120,14 @@ HOST=localhost
 PORT=8080
 LOG_LEVEL=info
 KUBECONFIG=  # Leave empty to use default ~/.kube/config
+HTTP_READ_TIMEOUT=10  # HTTP read timeout in seconds (default: 10)
+HTTP_WRITE_TIMEOUT=10  # HTTP write timeout in seconds (default: 10)
+HTTP_IDLE_TIMEOUT=30  # HTTP idle timeout in seconds (default: 30)
 ```
 
 ### Frontend CORS
 
-The backend allows CORS from:
-- http://localhost:5173 (Vite dev server)
-- http://localhost:3000 (alternative dev port)
+The backend allows CORS from any localhost or 127.0.0.1 origin on any port (for local development flexibility).
 
 ## Code Style Guidelines
 
