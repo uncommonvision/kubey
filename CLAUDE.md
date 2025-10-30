@@ -11,7 +11,7 @@ Kubey is a Kubernetes cluster monitoring and visualization tool with a React/Typ
 This is a monorepo with two main components:
 
 - `web/` - React frontend (TypeScript + Vite)
-- `server/` - Go backend (Gin framework)
+- `api/` - Go backend (Gin framework)
 
 ## Development Commands
 
@@ -26,9 +26,9 @@ Working directory: `C:\Users\Justi\Documents\kubey\web`
 - **Preview production build**: `npm run preview`
 - **Preview (network)**: `npm run preview+`
 
-### Backend (server/)
+### Backend (api/)
 
-Working directory: `C:\Users\Justi\Documents\kubey\server`
+Working directory: `C:\Users\Justi\Documents\kubey\api`
 
 - **Run server**: `go run cmd/api/main.go`
 - **Build**: `go build -o kubey-server.exe ./cmd/api/main.go`
@@ -68,7 +68,7 @@ KubeCluster (root)
 
 Backend structure:
 ```
-server/
+api/
 ├── cmd/
 │   └── api/main.go                              # Entry point, server setup
 ├── internal/
@@ -111,10 +111,9 @@ The client is initialized once at startup in `cmd/api/main.go` via `kubernetes.I
 
 ## Environment Configuration
 
-### Backend (.env in server/)
+### Backend (.env in api/)
 
-Create `server/.env` (optional, falls back to defaults):
-```
+Create `api/.env` (optional, falls back to defaults):
 ENVIRONMENT=development
 HOST=localhost
 PORT=8080
@@ -123,7 +122,6 @@ KUBECONFIG=  # Leave empty to use default ~/.kube/config
 HTTP_READ_TIMEOUT=10  # HTTP read timeout in seconds (default: 10)
 HTTP_WRITE_TIMEOUT=10  # HTTP write timeout in seconds (default: 10)
 HTTP_IDLE_TIMEOUT=30  # HTTP idle timeout in seconds (default: 30)
-```
 
 ### Frontend CORS
 
