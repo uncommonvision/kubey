@@ -27,7 +27,7 @@ api-clean:
 	@rm -f api/bin/$(BINARY)
 
 api-test:
-	@cd api && $(GO) test ./... -v
+	@cd api && gotestsum --format testname -- ./...
 
 # ==== WEB (frontend) targets =====================================
 .PHONY: web-deps web-dev web-dev+ web-build web-preview web-preview+ web-clean web-test

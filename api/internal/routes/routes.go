@@ -2,8 +2,8 @@ package routes
 
 import (
 	"kubey/api/internal/config"
+	"kubey/api/internal/handlers"
 	"kubey/api/internal/handlers/clusters"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,10 +22,5 @@ func Setup(router *gin.Engine, cfg *config.ApiConfig) {
 	}
 
 	// Health check
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "ok",
-			"time":   time.Now().Unix(),
-		})
-	})
+	router.GET("/health", handlers.Health)
 }
