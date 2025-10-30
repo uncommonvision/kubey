@@ -1,6 +1,9 @@
 .env
 *.log
+
+bin/*
+!bin/.gitkeep
+
 tmp/
 vendor/
-bin/
 public/

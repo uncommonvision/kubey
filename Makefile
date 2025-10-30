@@ -18,13 +18,13 @@ api-deps:
 	@cd api && $(GO) mod download
 
 api-build: api-deps
-	@cd api && $(GO) build -o $(BINARY) ./cmd/api/main.go
+	@cd api && $(GO) build -o bin/$(BINARY) ./cmd/api/main.go
 
 api-run: api-deps
 	@cd api && $(GO) run ./cmd/api/main.go
 
 api-clean:
-	@rm -f api/$(BINARY)
+	@rm -f api/bin/$(BINARY)
 
 api-test:
 	@cd api && $(GO) test ./... -v
@@ -70,7 +70,7 @@ dev: api-run web-dev
 
 # Build both and serve the production UI (good for Docker / prod)
 start: api-build web-build
-	@cd api && ./$(BINARY) & \
+	@cd api && ./bin/$(BINARY) & \
 	cd web && $(BUN_RUN) preview
 
 # Clean everything
