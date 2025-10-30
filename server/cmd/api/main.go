@@ -11,6 +11,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"kubey/server/internal/config"
+	"kubey/server/internal/middlewares/logging"
+	"kubey/server/internal/middlewares/recovery"
+	"kubey/server/internal/middlewares/request"
+	"kubey/server/internal/middlewares/security"
 	"kubey/server/internal/routes"
 	"kubey/server/internal/services/kubernetes"
 )
@@ -28,6 +32,16 @@ func main() {
 	}
 
 	router := gin.New()
+
+	// Register middleware in correct order
+	// 1. Recovery - must be first to catch panics
+	router.Use(recovery.Recover())
+	// 2. Request ID - generate/track request IDs
+	router.Use(request.RequestID())
+	// 3. Logging - log requests after request ID is set
+	router.Use(logging.Logger())
+	// 4. CORS - handle cross-origin requests
+	router.Use(security.CORS(cfg))
 
 	routes.Setup(router, cfg)
 

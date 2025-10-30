@@ -4,20 +4,23 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type ApiConfig struct {
-	Environment       string
-	Host              string
-	Port              string
-	LogLevel          string
-	KubeConfig        string
-	HTTPReadTimeout   time.Duration
-	HTTPWriteTimeout  time.Duration
-	HTTPIdleTimeout   time.Duration
+	Environment      string
+	Host             string
+	Port             string
+	LogLevel         string
+	KubeConfig       string
+	HTTPReadTimeout  time.Duration
+	HTTPWriteTimeout time.Duration
+	HTTPIdleTimeout  time.Duration
+	AllowedOrigins   []string
+	RequestIDHeader  string
 }
 
 func LoadApi() *ApiConfig {
@@ -35,6 +38,8 @@ func LoadApi() *ApiConfig {
 		HTTPReadTimeout:  getDurationEnv("HTTP_READ_TIMEOUT", 10*time.Second),
 		HTTPWriteTimeout: getDurationEnv("HTTP_WRITE_TIMEOUT", 10*time.Second),
 		HTTPIdleTimeout:  getDurationEnv("HTTP_IDLE_TIMEOUT", 30*time.Second),
+		AllowedOrigins:   getSliceEnv("ALLOWED_ORIGINS", []string{"http://localhost:5173", "http://127.0.0.1:5173"}),
+		RequestIDHeader:  getEnv("REQUEST_ID_HEADER", "X-Request-ID"),
 	}
 
 	return config
@@ -43,6 +48,25 @@ func LoadApi() *ApiConfig {
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
+	}
+	return defaultValue
+}
+
+func getSliceEnv(key string, defaultValue []string) []string {
+	if value := os.Getenv(key); value != "" {
+		// Split by comma and trim spaces
+		items := strings.Split(value, ",")
+		slice := make([]string, 0)
+		for _, item := range items {
+			trimmed := strings.TrimSpace(item)
+			if trimmed != "" {
+				slice = append(slice, trimmed)
+			}
+		}
+		// If we got valid items, return them; otherwise return default
+		if len(slice) > 0 {
+			return slice
+		}
 	}
 	return defaultValue
 }
