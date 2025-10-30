@@ -3,7 +3,7 @@ import { KubeClusterList } from "@/containers"
 import { ComparisonBanner, ViewToggle } from "@/components/ui"
 import { DefaultLayout } from "@/components/layout"
 import { useKeydownShortcut } from '@/hooks/useKeydownShortcut'
-import { api, ApiError } from '@/lib/api'
+import { getClusters, ApiError } from '@/services'
 import type { KubeCluster } from '@/types/kube'
 
 export default function HomePage() {
@@ -21,14 +21,14 @@ export default function HomePage() {
   useEffect(() => {
     const fetchClusters = async () => {
       try {
-        console.log('Fetching clusters from API...')
         setLoading(true)
         setError(null)
-        const data = await api.getClusters()
-        console.log('Received clusters:', data)
+        const data = await getClusters()
         setClusters(data)
       } catch (err) {
         if (err instanceof ApiError) {
+          setError(err.message)
+        } else if (err instanceof Error) {
           setError(err.message)
         } else {
           setError('Failed to fetch clusters')
