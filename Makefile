@@ -12,7 +12,7 @@ BUN     ?= bun
 BUN_RUN ?= $(BUN) run
 
 # ==== API (backend) targets ======================================
-.PHONY: api-deps api-build api-run api-clean api-test
+.PHONY: api-deps api-build api-dev api-dev+ api-clean api-test
 
 api-deps:
 	@cd api && $(GO) mod download
@@ -20,8 +20,11 @@ api-deps:
 api-build: api-deps
 	@cd api && $(GO) build -o bin/$(BINARY) ./cmd/api/main.go
 
-api-run: api-deps
+api-dev: api-deps
 	@cd api && $(GO) run ./cmd/api/main.go
+
+api-dev+: api-deps
+	@cd api && $(GO) run ./cmd/api/main.go HOST=0.0.0.0
 
 api-clean:
 	@rm -f api/bin/$(BINARY)
@@ -66,7 +69,7 @@ web-test:
 .PHONY: dev start clean help
 
 # Run both API and web dev servers concurrently
-dev: api-run web-dev
+dev: api-dev web-dev
 
 # Build both and serve the production UI (good for Docker / prod)
 start: api-build web-build
@@ -82,7 +85,8 @@ help:
 	@echo "Makefile targets:"
 	@echo "  api-deps       – download Go module dependencies"
 	@echo "  api-build      – compile the API binary"
-	@echo "  api-run        – run API in development mode"
+	@echo "  api-dev        – run API in development mode"
+	@echo "  api-dev+       – run API in development mode on 0.0.0.0"
 	@echo "  api-test       – run Go tests"
 	@echo "  web-deps       – install bun dependencies"
 	@echo "  web-dev        – start Vite dev server (localhost only)"
