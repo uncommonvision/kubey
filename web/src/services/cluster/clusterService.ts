@@ -62,8 +62,5 @@ export const getClusterDeployments = (id: string) => fetchApi(`/api/clusters/${i
 
 export const getClusterNamespaces = (id: string) => fetchApi(`/api/clusters/${id}/namespaces`)
 
-// Health check
-export const healthCheck = () => fetchApi<{ status: string; time: number }>('/health')
-
 // Export ApiError constructor for convenience
 export const ApiError = createApiError
