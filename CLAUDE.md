@@ -114,6 +114,7 @@ The client is initialized once at startup in `cmd/api/main.go` via `kubernetes.I
 ### Backend (.env in api/)
 
 Create `api/.env` (optional, falls back to defaults):
+```
 ENVIRONMENT=development
 HOST=localhost
 PORT=8080
@@ -122,6 +123,7 @@ KUBECONFIG=  # Leave empty to use default ~/.kube/config
 HTTP_READ_TIMEOUT=10  # HTTP read timeout in seconds (default: 10)
 HTTP_WRITE_TIMEOUT=10  # HTTP write timeout in seconds (default: 10)
 HTTP_IDLE_TIMEOUT=30  # HTTP idle timeout in seconds (default: 30)
+```
 
 ### Frontend CORS
 

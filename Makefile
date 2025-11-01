@@ -12,7 +12,7 @@ BUN     ?= bun
 BUN_RUN ?= $(BUN) run
 
 # ==== API (backend) targets ======================================
-.PHONY: api-deps api-build api-run api-clean api-test
+.PHONY: api-deps api-build api-dev api-dev+ api-clean api-test
 
 api-deps:
 	@cd api && $(GO) mod download
@@ -20,8 +20,11 @@ api-deps:
 api-build: api-deps
 	@cd api && $(GO) build -o bin/$(BINARY) ./cmd/api/main.go
 
-api-run: api-deps
+api-dev: api-deps
 	@cd api && $(GO) run ./cmd/api/main.go
+
+api-dev+: api-deps
+	@cd api && HOST=0.0.0.0 $(GO) run ./cmd/api/main.go
 
 api-clean:
 	@rm -f api/bin/$(BINARY)
@@ -41,7 +44,7 @@ web-dev: web-deps
 
 # Development server – listen on all interfaces (0.0.0.0)
 web-dev+: web-deps
-	@cd web && HOST=0.0.0.0 $(BUN_RUN) dev
+	@cd web && $(BUN_RUN) dev --host 0.0.0.0
 
 # Production build
 web-build: web-deps
@@ -53,7 +56,7 @@ web-preview: web-build
 
 # Preview the production build on all interfaces
 web-preview+: web-build
-	@cd web && HOST=0.0.0.0 $(BUN_RUN) preview
+	@cd web && $(BUN_RUN) preview --host 0.0.0.0
 
 web-clean:
 	@rm -rf web/node_modules web/dist
@@ -66,7 +69,7 @@ web-test:
 .PHONY: dev start clean help
 
 # Run both API and web dev servers concurrently
-dev: api-run web-dev
+dev: api-dev web-dev
 
 # Build both and serve the production UI (good for Docker / prod)
 start: api-build web-build
@@ -82,7 +85,8 @@ help:
 	@echo "Makefile targets:"
 	@echo "  api-deps       – download Go module dependencies"
 	@echo "  api-build      – compile the API binary"
-	@echo "  api-run        – run API in development mode"
+	@echo "  api-dev        – run API in development mode"
+	@echo "  api-dev+       – run API in development mode on 0.0.0.0"
 	@echo "  api-test       – run Go tests"
 	@echo "  web-deps       – install bun dependencies"
 	@echo "  web-dev        – start Vite dev server (localhost only)"
